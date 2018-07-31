@@ -3,28 +3,50 @@
 *    Mastering Data Visualization with D3.js
 *    2.8 - Activity: Your first visualization!
 */
+var margin = {left:100, right :10, top:10, bottom:100}
+var width = 600 - margin.left - margin.right
+var height = 400 - margin.top - margin.bottom
+
 var svg = d3.select("#chart-area").append("svg")
-    .attr('width', '500')
-    .attr('height', '500')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
 
+var g =svg.append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
-d3.json("data/buildings.json").then((data) =>{
+d3.json("data/buildings.json").then(function(data){
   data.forEach((d) =>{
     d.height = +d.height
   })
+
+
   var x = d3.scaleBand()
-  .domain(["Burj Khalifa", "Shanghai Tower", "Abraj Al-Bait Clock Tower", "Ping An Finance Centre", "Lotte World Tower", "One World Trade Center", "Guangzhou CTF Finance Center"])
-  .range([0,400])
+  .domain(data.map((d) =>{
+    return d.name
+  }))
+  .range([0,height])
   .paddingInner(0.3)
   .paddingOuter(0.3)
 
-
-
   var y = d3.scaleLinear()
-    .domain([0, 828])
-    .range([0, 400])
+    .domain([0, d3.max(data, (d) =>{
+      return d.height
+    })])
+    .range([0, height])
 
-  var rect = svg.selectAll("rect")
+  var xAxisCall = d3.axisBottom(x)
+  g.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "Translate(0, " + height + ")")
+    .call(xAxisCall)
+
+  var yAxisCall = d3.axisLeft(y)
+  g.append("g")
+    .attr("class", "y axis")
+    .call(yAxisCall)
+
+
+  var rect = g.selectAll("rect")
     .data(data)
     .enter()
     .append('rect')
@@ -41,7 +63,7 @@ d3.json("data/buildings.json").then((data) =>{
       .attr('stroke', 'black')
       .style('fill', (d) =>{
         if(d.name == "Lotte World Tower"){
-          return "blue"
+          return "green"
         }else{
           return "red"
         }
